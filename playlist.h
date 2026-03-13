@@ -17,4 +17,10 @@ typedef struct Node {
     struct Node *prev;
 } Node;
 
+typedef struct {
+    Node* head;
+    Node* tail;
+    Node* current;
+    int count;
+} Playlist;
 #endif //PLAYLISTAPP_PLAYLIST_H
