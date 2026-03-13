@@ -10,4 +10,11 @@ typedef struct Song {
     char album[100];
     Music music;
 } Song;
+
+typedef struct Node {
+    Song song;
+    struct Node *next;
+    struct Node *prev;
+} Node;
+
 #endif //PLAYLISTAPP_PLAYLIST_H
