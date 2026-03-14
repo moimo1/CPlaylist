@@ -23,4 +23,10 @@ typedef struct {
     Node* current;
     int count;
 } Playlist;
+
+void createPlaylist(Playlist* pl);
+void addSong(Playlist* pl, Song song);
+void removeSong(Playlist* pl, Song song);
+void nextSong(Playlist* pl);
+void prevSong(Playlist* pl);
 #endif //PLAYLISTAPP_PLAYLIST_H
