@@ -29,35 +29,26 @@ void addSong(Playlist* pl, Song song) {
     pl->count++;
 }
 
-void removeSong(Playlist* pl, Song song) {
-    Node* temp = pl->head;
+void removeSong(Playlist* pl, Node* target) {
+    if (!pl || !target) return;
 
-    while (temp != NULL) {
-        if (strcmp(temp->song.title, song.title) == 0) {
-            if (pl->current == temp) {
-                pl->current = temp->next ? temp->next : temp->prev;
-            }
-
-            if (temp->next) {
-                temp->next->prev = temp->prev;
-            }
-            if (temp->prev) {
-                temp->prev->next = temp->next;
-            }
-
-            if (temp == pl->head) {
-                pl->head = temp->next;
-            }
-            if (temp == pl->tail) {
-                pl->tail = temp->prev;
-            }
-
-            free(temp);
-            pl->count--;
-            return;
-        }
-        temp = temp->next;
+    if (pl->current == target) {
+        pl->current = target->next ? target->next : target->prev;
     }
+
+    if (target->next) target->next->prev = target->prev;
+    if (target->prev) target->prev->next = target->next;
+
+    if (target == pl->head) pl->head = target->next;
+    if (target == pl->tail) pl->tail = target->prev;
+
+    // Optional: Only unload if it's actually loaded
+    if (target->song.music.stream.buffer != NULL) {
+        UnloadMusicStream(target->song.music);
+    }
+    
+    free(target);
+    pl->count--;
 }
 
 void nextSong(Playlist* pl) {
