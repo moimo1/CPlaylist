@@ -1,7 +1,6 @@
 #include "playlist.h"
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 void createPlaylist(Playlist* pl, const char* title) {
     strncpy(pl->title, title, sizeof(pl->title));
