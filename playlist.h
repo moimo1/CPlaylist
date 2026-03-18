@@ -18,13 +18,14 @@ typedef struct Node {
 } Node;
 
 typedef struct {
+    char title[100];
     Node* head;
     Node* tail;
     Node* current;
     int count;
 } Playlist;
 
-void createPlaylist(Playlist* pl);
+void createPlaylist(Playlist* pl, const char* title);
 void addSong(Playlist* pl, Song song);
 void removeSong(Playlist* pl, Song song);
 void nextSong(Playlist* pl);
