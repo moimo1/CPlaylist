@@ -4,12 +4,74 @@
 #include "screens.h"
 #include "ui_components.h"
 #include <string.h>
+#include <stdio.h>
+
+void SavePlaylists(AppState* state) {
+    FILE* file = fopen("playlists.dat", "wb");
+    if (!file) return;
+
+    fwrite(&state->count, sizeof(int), 1, file);
+    for (int i = 0; i < state->count; i++) {
+        Playlist* pl = &state->playlists[i];
+        fwrite(pl->title, sizeof(char), 100, file);
+        fwrite(&pl->count, sizeof(int), 1, file);
+
+        Node* current = pl->head;
+        while (current) {
+            Song songData = current->song;
+            fwrite(songData.title, sizeof(char), 100, file);
+            fwrite(songData.artist, sizeof(char), 100, file);
+            fwrite(songData.album, sizeof(char), 100, file);
+            fwrite(songData.path, sizeof(char), 512, file);
+            current = current->next;
+        }
+    }
+    fclose(file);
+}
+
+void LoadPlaylists(AppState* state) {
+    FILE* file = fopen("playlists.dat", "rb");
+    if (!file) return;
+
+    int playlistCount = 0;
+    if (fread(&playlistCount, sizeof(int), 1, file) != 1) {
+        fclose(file);
+        return;
+    }
+
+    state->count = playlistCount;
+    for (int i = 0; i < playlistCount; i++) {
+        Playlist* pl = &state->playlists[i];
+        fread(pl->title, sizeof(char), 100, file);
+        
+        pl->head = NULL;
+        pl->tail = NULL;
+        pl->current = NULL;
+        pl->count = 0;
+
+        int songCount = 0;
+        if (fread(&songCount, sizeof(int), 1, file) != 1) continue;
+
+        for (int j = 0; j < songCount; j++) {
+            Song song;
+            fread(song.title, sizeof(char), 100, file);
+            fread(song.artist, sizeof(char), 100, file);
+            fread(song.album, sizeof(char), 100, file);
+            fread(song.path, sizeof(char), 512, file);
+            
+            song.music = LoadMusicStream(song.path);
+            addSong(pl, song);
+        }
+    }
+    fclose(file);
+}
 
 int main() {
     InitWindow(1200, 850, "Spotify Clone - Raylib Edition");
     InitAudioDevice();
     SetTargetFPS(60);
-    AppState state = { .count = 0, .selectedIdx = -1, .currentScreen = SCREEN_HOME, .activeField = 0 };
+    AppState state = { .count = 0, .selectedIdx = -1, .currentScreen = SCREEN_HOME, .activeField = 0, .activeModal = MODAL_NONE };
+    LoadPlaylists(&state);
 
     while (!WindowShouldClose()) {
         // --- LOGIC UPDATES ---
@@ -56,6 +118,8 @@ int main() {
 
         EndDrawing();
     }
+
+    SavePlaylists(&state);
 
     // Cleanup Playlists
     for (int i = 0; i < state.count; i++) {
