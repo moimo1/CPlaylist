@@ -12,9 +12,9 @@ typedef struct Song {
 } Song;
 
 typedef struct Node {
-    Song song;
     struct Node *next;
     struct Node *prev;
+    Song song;
 } Node;
 
 typedef struct {
