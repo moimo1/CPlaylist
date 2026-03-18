@@ -29,3 +29,34 @@ void addSong(Playlist* pl, Song song) {
     pl->tail = newNode;
     pl->count++;
 }
+
+void removeSong(Playlist* pl, Song song) {
+    Node* temp = pl->head;
+
+    while (temp != NULL) {
+        if (strcmp(temp->song.title, song.title) == 0) {
+            if (pl->current == temp) {
+                pl->current = temp->next ? temp->next : temp->prev;
+            }
+
+            if (temp->next) {
+                temp->next->prev = temp->prev;
+            }
+            if (temp->prev) {
+                temp->prev->next = temp->next;
+            }
+
+            if (temp == pl->head) {
+                pl->head = temp->next;
+            }
+            if (temp == pl->tail) {
+                pl->tail = temp->prev;
+            }
+
+            free(temp);
+            pl->count--;
+            return;
+        }
+        temp = temp->next;
+    }
+}
