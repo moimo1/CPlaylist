@@ -56,9 +56,6 @@ int main() {
 
     // Cleanup Playlists
     for (int i = 0; i < state.count; i++) {
-        // Since we extracted destroyPlaylist into screens.c, 
-        // we can just repeatedly delete the 0th item as a hack or manually free.
-        // It's cleaner if we exported destroyPlaylist, but for simplicity here over deletion loop:
         deletePlaylistAt(&state, 0); 
     }
     
