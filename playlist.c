@@ -60,3 +60,11 @@ void removeSong(Playlist* pl, Song song) {
         temp = temp->next;
     }
 }
+
+void nextSong(Playlist* pl) {
+    if (pl->current != NULL && pl->current->next != NULL) {
+        pl->current = pl->current->next;
+    } else if (pl->head != NULL) {
+        pl->current = pl->head;
+    }
+}
