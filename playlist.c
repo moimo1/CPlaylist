@@ -68,3 +68,11 @@ void nextSong(Playlist* pl) {
         pl->current = pl->head;
     }
 }
+
+void prevSong(Playlist* pl) {
+    if (pl->current != NULL && pl->current->prev != NULL) {
+        pl->current = pl->current->prev;
+    } else if (pl->tail != NULL) {
+        pl->current = pl->tail;
+    }
+}
