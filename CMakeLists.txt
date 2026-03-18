@@ -13,13 +13,15 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(raylib)
 
-add_executable(untitled main.c
+add_executable(untitled 
+        main.c
         playlist.c
         playlist.h
-        playlist.h
-        playlist.c
-        playlist.c
-        playlist.h)
+        state.h
+        ui_components.c
+        ui_components.h
+        screens.c
+        screens.h)
 
 target_link_libraries(untitled raylib)
 
