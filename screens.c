@@ -100,6 +100,7 @@ void DrawPlaylistScreen(AppState* state, int mainX, int mainW) {
         state->activeModal = MODAL_SONG; state->isEditing = false;
         state->buffer1[0] = state->buffer2[0] = state->buffer3[0] = '\0';
         state->letterCount1 = state->letterCount2 = state->letterCount3 = state->activeField = 0;
+        state->songPathError = false;
     }
 
     int tableY = 320;
@@ -124,6 +125,7 @@ void DrawPlaylistScreen(AppState* state, int mainX, int mainW) {
                 strcpy(state->buffer1, curr->song.title); state->letterCount1 = strlen(state->buffer1);
                 strcpy(state->buffer2, curr->song.artist); state->letterCount2 = strlen(state->buffer2);
                 strcpy(state->buffer3, curr->song.path); state->letterCount3 = strlen(state->buffer3);
+                state->songPathError = false;
             }
             if (IconButton((Rectangle){row.x + row.width - 40, row.y + 8, 30, 25}, "X", COLOR_DANGER, false)) {
                 removeSong(active, curr); break;
@@ -207,30 +209,46 @@ void DrawModals(AppState* state) {
                 DrawText(bufs[i], f.x+10, f.y+10, 14, WHITE);
             }
 
-            if (CheckCollisionPointRec(GetMousePosition(), f) && IsMouseButtonPressed(0)) state->activeField = i;
+            bool clickedField = CheckCollisionPointRec(GetMousePosition(), f) && IsMouseButtonPressed(0);
+            if (clickedField) {
+                state->activeField = i;
+                if (i == 2) state->songPathError = false;
+            }
         }
         
+        int previousCount = *counts[state->activeField];
         HandleTextInput(bufs[state->activeField], counts[state->activeField], state->activeField == 2 ? 255 : 64);
-        
+        if (state->activeField == 2 && *counts[2] != previousCount) state->songPathError = false;
+
+        if (state->songPathError) {
+            DrawText("Invalid file type. Use .mp3 or .wav", mRec.x + 25, mRec.y + 232, 12, COLOR_DANGER);
+        }
+
         if (IconButton((Rectangle){mRec.x+210, mRec.y+250, 165, 40}, "Done", COLOR_ACCENT, true)) {
-            if (state->isEditing) {
-                strcpy(state->editingSong->song.title, state->buffer1); 
-                strcpy(state->editingSong->song.artist, state->buffer2);
-                if (strcmp(state->editingSong->song.path, state->buffer3) != 0) {
-                    strcpy(state->editingSong->song.path, state->buffer3);
-                    if (state->editingSong->song.music.stream.buffer != NULL) UnloadMusicStream(state->editingSong->song.music);
-                    state->editingSong->song.music = LoadMusicStream(state->buffer3);
-                }
+            bool pathProvided = strlen(state->buffer3) > 0;
+            if (pathProvided && !IsValidAudioFile(GetFileExtension(state->buffer3))) {
+                state->songPathError = true;
             } else {
-                Song s = {0}; 
-                strcpy(s.title, strlen(state->buffer1) > 0 ? state->buffer1 : "Unknown Title"); 
-                strcpy(s.artist, strlen(state->buffer2) > 0 ? state->buffer2 : "Unknown Artist");
-                strcpy(s.path, state->buffer3);
-                if (strlen(state->buffer3) > 0) s.music = LoadMusicStream(state->buffer3);
-                
-                addSong(&state->playlists[state->selectedIdx], s);
+                state->songPathError = false;
+                if (state->isEditing) {
+                    strcpy(state->editingSong->song.title, state->buffer1);
+                    strcpy(state->editingSong->song.artist, state->buffer2);
+                    if (strcmp(state->editingSong->song.path, state->buffer3) != 0) {
+                        strcpy(state->editingSong->song.path, state->buffer3);
+                        if (state->editingSong->song.music.stream.buffer != NULL) UnloadMusicStream(state->editingSong->song.music);
+                        state->editingSong->song.music = LoadMusicStream(state->buffer3);
+                    }
+                } else {
+                    Song s = {0};
+                    strcpy(s.title, strlen(state->buffer1) > 0 ? state->buffer1 : "Unknown Title");
+                    strcpy(s.artist, strlen(state->buffer2) > 0 ? state->buffer2 : "Unknown Artist");
+                    strcpy(s.path, state->buffer3);
+                    if (strlen(state->buffer3) > 0) s.music = LoadMusicStream(state->buffer3);
+
+                    addSong(&state->playlists[state->selectedIdx], s);
+                }
+                state->activeModal = MODAL_NONE;
             }
-            state->activeModal = MODAL_NONE;
         }
         if (IconButton((Rectangle){mRec.x + 25, mRec.y + 250, 165, 40}, "Cancel", COLOR_HOVER, true)) state->activeModal = MODAL_NONE;
     }

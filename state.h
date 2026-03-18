@@ -29,6 +29,7 @@ typedef struct {
     // Input
     char buffer1[64], buffer2[64], buffer3[256];
     int letterCount1, letterCount2, letterCount3, activeField;
+    bool songPathError;
 } AppState;
 
 #endif //PLAYLISTAPP_STATE_H

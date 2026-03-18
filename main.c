@@ -26,6 +26,9 @@ int main() {
                     strncpy(state.buffer3, droppedFiles.paths[0], 255);
                     state.buffer3[255] = '\0';
                     state.letterCount3 = strlen(state.buffer3);
+                    state.songPathError = false;
+                } else {
+                    state.songPathError = true;
                 }
             }
             UnloadDroppedFiles(droppedFiles);
